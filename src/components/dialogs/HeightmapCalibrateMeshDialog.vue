@@ -60,7 +60,7 @@ export default class HeightmapRenameProfileDialog extends Mixins(BaseMixin) {
     ]
 
     calibrateMesh(): void {
-        const gcode = `BED_MESH_CALIBRATE PROFILE="${this.name}"`
+        const gcode = `_FIX_BED_MESH_CALIBRATE PROFILE="${this.name}"`
 
         this.$store.dispatch('server/addEvent', { message: gcode, type: 'command' })
         this.$socket.emit('printer.gcode.script', { script: gcode }, { loading: 'bedMeshCalibrate' })
