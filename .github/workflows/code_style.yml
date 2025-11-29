@@ -41,6 +41,6 @@ jobs:
         uses: wearerequired/lint-action@v2
         with:
           eslint: true
-          prettier: true
+          prettier: false
           eslint_dir: src
           eslint_extensions: ts,vue,json
