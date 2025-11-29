@@ -81,7 +81,11 @@ jobs:
           echo "TAG_NAME=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_OUTPUT
 
       - name: Generate a changelog
+<<<<<<< HEAD
         uses: orhun/git-cliff-action@v3
+=======
+        uses: orhun/git-cliff-action@v4
+>>>>>>> bddeee995eb80e3c076982e21d57f347d706586b
         id: generate-changelog
         with:
           config: ./cliff-release.toml
@@ -100,48 +104,3 @@ jobs:
       - name: Copy remote configs to dist
         shell: bash
         run: cp ./remote/* ./dist/
-
-      - name: Upload to remote server
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ${{ secrets.REMOTEHOST }}
-          username: ${{ secrets.REMOTEUSER }}
-          password: ${{ secrets.REMOTEPASSWORD }}
-          dangerous-clean-slate: true
-          exclude: .htaccess
-          local-dir: ./dist/
-
-  update-changelog:
-    needs: ['release']
-    name: Generate changelog
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          ref: 'develop'
-          token: ${{ secrets.PAT }}
-          fetch-depth: 0
-
-      - name: Get latest tag
-        id: latest_tag
-        shell: bash
-        run: |
-          echo "TAG_NAME=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_OUTPUT
-
-      - name: Generate a changelog
-        uses: orhun/git-cliff-action@v3
-        id: git-cliff
-        with:
-          config: cliff.toml
-          args: v0.0.4..${{ steps.latest_tag.outputs.TAG_NAME }}
-        env:
-          OUTPUT: ${{ github.workspace }}/CHANGELOG.md
-
-      - name: Show CHANGELOG
-        run: |
-          cat CHANGELOG.md
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: 'docs(changelog): update changelog'
-          file_pattern: CHANGELOG.md
