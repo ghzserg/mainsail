@@ -94,11 +94,7 @@ jobs:
           echo "TAG_NAME=$(git describe --tags $(git rev-list --tags --max-count=1))" >> $GITHUB_OUTPUT
 
       - name: Generate a changelog
-<<<<<<< HEAD
-        uses: orhun/git-cliff-action@v3
-=======
         uses: orhun/git-cliff-action@v4
->>>>>>> bddeee995eb80e3c076982e21d57f347d706586b
         id: generate-changelog
         with:
           config: ./cliff-release.toml
