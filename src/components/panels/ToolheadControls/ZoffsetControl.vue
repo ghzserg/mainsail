@@ -163,19 +163,19 @@ export default class ZoffsetControl extends Mixins(BaseMixin, ZoffsetMixin) {
     }
 
     sendBabyStepDown(offset: number): void {
-        const gcode = `SET_GCODE_OFFSET Z_ADJUST=-${offset} ${this.homed_axis === 'xyz' ? 'MOVE=1' : ''}`
+        const gcode = `SET_GCODE_OFFSET FROM=mainsail Z_ADJUST=-${offset} ${this.homed_axis === 'xyz' ? 'MOVE=1' : ''}`
         this.$store.dispatch('server/addEvent', { message: gcode, type: 'command' })
         this.$socket.emit('printer.gcode.script', { script: gcode }, { loading: 'babyStepDown' })
     }
 
     sendBabyStepUp(offset: number): void {
-        const gcode = `SET_GCODE_OFFSET Z_ADJUST=+${offset} ${this.homed_axis === 'xyz' ? 'MOVE=1' : ''}`
+        const gcode = `SET_GCODE_OFFSET FROM=mainsail Z_ADJUST=+${offset} ${this.homed_axis === 'xyz' ? 'MOVE=1' : ''}`
         this.$store.dispatch('server/addEvent', { message: gcode, type: 'command' })
         this.$socket.emit('printer.gcode.script', { script: gcode }, { loading: 'babyStepUp' })
     }
 
     clearZOffset(): void {
-        const gcode = 'SET_GCODE_OFFSET Z=0' + (this.homed_axis === 'xyz' ? ' MOVE=1' : '')
+        const gcode = 'SET_GCODE_OFFSET FROM=mainsail Z=0' + (this.homed_axis === 'xyz' ? ' MOVE=1' : '')
         this.$store.dispatch('server/addEvent', { message: gcode, type: 'command' })
         this.$socket.emit('printer.gcode.script', { script: gcode }, { loading: 'babySteppingClear' })
     }

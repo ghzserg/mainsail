@@ -1,5 +1,5 @@
 <template>
-    <v-btn :color="color" :style="computedStyle" class="mx-2" @click="sendCommand">{{ text }}</v-btn>
+    <v-btn :color="color" :style="computedStyle" class="ma-2" @click="sendCommand">{{ text }}</v-btn>
 </template>
 
 <script lang="ts">
