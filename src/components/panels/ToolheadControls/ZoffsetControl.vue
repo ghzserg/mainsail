@@ -190,7 +190,7 @@ export default class ZoffsetControl extends Mixins(BaseMixin, ZoffsetMixin) {
     }
 
     saveConfig(): void {
-        const gcode = 'SAVE_CONFIG'
+        const gcode = '_SAVE_CONFIG'
         this.$store.dispatch('server/addEvent', { message: gcode, type: 'command' })
         this.$socket.emit('printer.gcode.script', { script: gcode }, { loading: 'topbarSaveConfig' })
         this.saveOffsetDialog = false

@@ -246,8 +246,8 @@ export default class TheTopbar extends Mixins(BaseMixin, ThemeMixin) {
     }
 
     saveConfig() {
-        this.$store.dispatch('server/addEvent', { message: 'SAVE_CONFIG', type: 'command' })
-        this.$socket.emit('printer.gcode.script', { script: 'SAVE_CONFIG' }, { loading: 'topbarSaveConfig' })
+        this.$store.dispatch('server/addEvent', { message: '_SAVE_CONFIG', type: 'command' })
+        this.$socket.emit('printer.gcode.script', { script: '_SAVE_CONFIG' }, { loading: 'topbarSaveConfig' })
     }
 
     btnUploadAndStart() {
