@@ -1,89 +1,125 @@
 <template>
     <div>
-        <v-divider />
         <v-row class="py-2">
-            <v-col>
+            <v-col class="pl-6">
                 <strong>{{ name }}</strong>
                 <br />
-                <template v-if="fullVersionString">
-                    <span class="text-caption">{{ fullVersionString }}</span>
+                <template v-if="type === 'git_repo' && commitsBehind.length">
+                    <a class="info--text cursor--pointer" @click="boolShowCommitList = true">
+                        <v-icon small color="info" class="mr-1">{{ mdiUpdate }}</v-icon>
+                        {{ versionOutput }}
+                    </a>
                 </template>
-                <template v-else>
-                    <span v-if="['python', 'web'].includes(type)" class="text-caption">
-                        <v-icon small>{{ mdiUpdate }}</v-icon>
+                <template v-else-if="type === 'web' && semverUpdatable">
+                    <a class="info--text text-decoration-none" :href="webLinkRelease" target="_blank">
+                        <v-icon small color="info" class="mr-1">{{ mdiUpdate }}</v-icon>
                         {{ versionOutput }}
-                    </span>
-                    <span v-else-if="type === 'git_repo'" class="text-caption">
-                        <v-icon small>{{ mdiUpdate }}</v-icon>
-                        {{ versionOutput }}
-                    </span>
-                    <span v-else class="text-caption">
-                        {{ versionOutput }}
-                    </span>
+                    </a>
                 </template>
-                <br />
-                <span v-if="anomalies.length">
-                    <v-btn-toggle v-model="toggleAnomalies" dense small>
-                        <v-btn small>
-                            <v-icon small>{{ toggleAnomalies ? mdiInformationOutline : mdiInformation }}</v-icon>
-                            {{ anomalies.length }}
-                        </v-btn>
-                    </v-btn-toggle>
-                </span>
+                <template v-else-if="type === 'python' && semverUpdatable">
+                    <a class="info--text text-decoration-none" :href="pythonChangelog" target="_blank">
+                        <v-icon small color="info" class="mr-1">{{ mdiUpdate }}</v-icon>
+                        {{ versionOutput }}
+                    </a>
+                </template>
+                <span v-else>{{ versionOutput }}</span>
             </v-col>
-            <v-col class="col-auto">
-                <v-menu v-if="isDirty || !isValid" left offset-y :close-on-content-click="false">
-                    <template #activator="{ on, attrs }">
-                        <v-btn
-                            :disabled="disabled"
-                            :color="btnColor"
-                            small
-                            outlined
-                            v-bind="attrs"
-                            v-on="on"
-                        >
-                            <v-icon small>{{ btnIcon }}</v-icon>
-                            {{ btnText }}
-                            <v-icon small>{{ mdiMenuDown }}</v-icon>
-                        </v-btn>
-                    </template>
-                    <v-list dense>
-                        <v-list-item @click="doRecovery(false)">
-                            <v-icon small left>{{ mdiReload }}</v-icon>
-                            {{ $t('Machine.UpdatePanel.SoftRecovery') }}
-                        </v-list-item>
-                        <v-list-item @click="doRecovery(true)">
-                            <v-icon small left>{{ mdiReload }}</v-icon>
-                            {{ $t('Machine.UpdatePanel.HardRecovery') }}
-                        </v-list-item>
-                    </v-list>
-                </v-menu>
-                <v-btn v-else :disabled="disabled || btnDisabled" :color="btnColor" small outlined @click="clickUpdate">
-                    <v-icon small>{{ btnIcon }}</v-icon>
+            <v-col class="col-auto pr-6 text-right" align-self="center">
+                <v-chip
+                    v-if="anomalies.length > 0"
+                    small
+                    label
+                    :outlined="!toggleAnomalies"
+                    color="grey"
+                    class="minwidth-0 px-1 mr-2"
+                    @click="toggleAnomalies = !toggleAnomalies">
+                    <v-icon small>{{ toggleAnomalies ? mdiInformationOutline : mdiInformation }}</v-icon>
+                </v-chip>
+                <template v-if="!isValid">
+                    <v-menu :offset-y="true">
+                        <template #activator="{ on, attrs }">
+                            <v-chip
+                                small
+                                label
+                                outlined
+                                :color="btnColor"
+                                :disabled="btnDisabled"
+                                class="minwidth-0 px-2 text-uppercase"
+                                v-bind="attrs"
+                                v-on="on">
+                                <v-icon small class="mr-1">{{ btnIcon }}</v-icon>
+                                {{ btnText }}
+                                <v-icon small>{{ mdiMenuDown }}</v-icon>
+                            </v-chip>
+                        </template>
+                        <v-list dense class="py-0">
+                            <v-list-item v-if="!isCorrupt" @click="doRecovery(false)">
+                                <v-list-item-icon class="mr-0 pt-1">
+                                    <v-icon small>{{ mdiReload }}</v-icon>
+                                </v-list-item-icon>
+                                <v-list-item-content>
+                                    <v-list-item-title>{{ $t('Machine.UpdatePanel.SoftRecovery') }}</v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item :disabled="!existsRecoveryUrl" @click="doRecovery(true)">
+                                <v-list-item-icon class="mr-0 pt-1">
+                                    <v-icon small>{{ mdiReload }}</v-icon>
+                                </v-list-item-icon>
+                                <v-list-item-content>
+                                    <v-list-item-title>{{ $t('Machine.UpdatePanel.HardRecovery') }}</v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+                        </v-list>
+                    </v-menu>
+                </template>
+                <v-chip
+                    v-else
+                    small
+                    label
+                    outlined
+                    :color="btnColor"
+                    :disabled="btnDisabled"
+                    class="minwidth-0 px-2 text-uppercase"
+                    @click="clickUpdate">
+                    <v-icon small class="mr-1">{{ btnIcon }}</v-icon>
                     {{ btnText }}
-                </v-btn>
-            </v-col>
-        </v-row>
-        <v-row v-if="anomalies.length && toggleAnomalies" class="mt-0">
-            <v-col>
-                <v-alert v-for="(message, index) in anomalies" :key="'anomaly-' + index" dense text type="info" class="my-1">
-                    {{ message }}
-                </v-alert>
+                </v-chip>
             </v-col>
         </v-row>
         <v-row v-if="warnings.length" class="mt-0">
-            <v-col>
-                <v-alert v-for="(message, index) in warnings" :key="'warning-' + index" dense text type="warning" class="my-1">
+            <v-col class="px-6 pt-0">
+                <v-alert
+                    v-for="(message, index) in warnings"
+                    :key="'warnings_' + index"
+                    dense
+                    text
+                    color="orange"
+                    border="left"
+                    :icon="mdiCloseCircle">
+                    <p class="text--disabled mb-0">{{ message }}</p>
+                </v-alert>
+            </v-col>
+        </v-row>
+        <v-row v-show="toggleAnomalies" class="mt-0">
+            <v-col class="px-6 pt-0">
+                <v-alert
+                    v-for="(message, index) in anomalies"
+                    :key="'anomalies_' + index"
+                    dense
+                    text
+                    color="grey"
+                    border="left"
+                    :icon="mdiInformation">
                     {{ message }}
                 </v-alert>
             </v-col>
         </v-row>
+        <git-commits-list v-if="type === 'git_repo'" v-model="boolShowCommitList" :repo="repo" />
         <update-hint
-            :bool-show-dialog="boolShowUpdateHint"
-            :name="name"
-            @close="closeShowUpdateHint"
-            @update="doUpdate"
-        />
+            v-model="boolShowUpdateHint"
+            :repo="repo"
+            @open-commit-history="boolShowCommitList = true"
+            @do-update="doUpdate" />
     </div>
 </template>
 
@@ -105,7 +141,6 @@ import {
 import semver from 'semver'
 import GitCommitsList from '@/components/panels/Machine/UpdatePanel/GitCommitsList.vue'
 import UpdateHint from '@/components/panels/Machine/UpdatePanel/UpdateHint.vue'
-
 @Component({
     components: { GitCommitsList, UpdateHint },
 })
@@ -123,7 +158,6 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     toggleAnomalies = false
 
     @Prop({ required: true }) readonly repo!: ServerUpdateManagerStateGitRepo
-    @Prop({ type: Boolean, default: false }) readonly disabled!: boolean
 
     get name() {
         const info_tags = this.repo.info_tags ?? []
@@ -211,6 +245,7 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     }
 
     get isCorrupt() {
+        // Only git repos can be corrupt
         if (this.configuredType !== 'git_repo') return false
 
         return this.repo.corrupt ?? false
@@ -321,8 +356,6 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     }
 
     clickUpdate() {
-        if (this.disabled) return
-
         if (this.hideUpdateWarning) {
             this.doUpdate()
             return
@@ -332,8 +365,6 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     }
 
     doUpdate() {
-        if (this.disabled) return
-
         if (['klipper', 'moonraker'].includes(this.repo.name)) {
             this.$socket.emit('machine.update.' + this.repo.name, {})
             return
@@ -343,8 +374,6 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     }
 
     doRecovery(hard: boolean) {
-        if (this.disabled) return
-
         this.$socket.emit('machine.update.recover', { name: this.repo.name, hard: hard })
     }
 
@@ -357,3 +386,5 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     }
 }
 </script>
+
+<style scoped></style>
