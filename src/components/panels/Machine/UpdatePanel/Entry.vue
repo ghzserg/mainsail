@@ -158,6 +158,7 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     toggleAnomalies = false
 
     @Prop({ required: true }) readonly repo!: ServerUpdateManagerStateGitRepo
+    @Prop({ type: Boolean, default: false }) readonly updatesChecked!: boolean
 
     get name() {
         const info_tags = this.repo.info_tags ?? []
@@ -268,6 +269,7 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     }
 
     get btnDisabled() {
+        if (!this.updatesChecked) return true
         if (['printing', 'paused'].includes(this.printer_state)) return true
         if (!this.isValid || this.isCorrupt || this.isDirty || this.commitsBehind.length) return false
 
