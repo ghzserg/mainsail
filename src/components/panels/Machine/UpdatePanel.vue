@@ -29,7 +29,11 @@
                 <template v-if="checkInitState">
                     <template v-for="(module, index) in modules">
                         <v-divider v-if="index" :key="'divider_' + module.name" class="my-0" />
-                        <update-panel-entry :key="module.name" :repo="module.data" />
+                        <update-panel-entry 
+                            :key="module.name" 
+                            :repo="module.data" 
+                            :updates-checked="updatesChecked" 
+                        />
                     </template>
                     <template v-if="existsSystemModul">
                         <v-divider v-if="modules.length" class="my-0" />
@@ -58,7 +62,6 @@ import UpdatePanelEntry from '@/components/panels/Machine/UpdatePanel/Entry.vue'
 import UpdatePanelEntrySystem from '@/components/panels/Machine/UpdatePanel/EntrySystem.vue'
 import { mdiRefresh, mdiInformation, mdiCloseThick, mdiUpdate } from '@mdi/js'
 import { ServerUpdateManagerStateGuiList } from '@/store/server/updateManager/types'
-import semver from 'semver'
 
 @Component({
     components: { Panel, UpdatePanelEntry, UpdatePanelEntrySystem },
@@ -68,6 +71,8 @@ export default class UpdatePanel extends Mixins(BaseMixin) {
     mdiInformation = mdiInformation
     mdiCloseThick = mdiCloseThick
     mdiUpdate = mdiUpdate
+
+    updatesChecked = false
 
     get enableUpdateManager() {
         return this.$store.state.server.components.includes('update_manager')
@@ -89,11 +94,11 @@ export default class UpdatePanel extends Mixins(BaseMixin) {
         const initModules = this.modules.filter(
             (module: ServerUpdateManagerStateGuiList) => module.data.remote_version !== '?'
         )
-
         return initModules.length > 0
     }
 
     btnSync() {
+        this.updatesChecked = true
         this.$socket.emit(
             'machine.update.status',
             { refresh: true },
