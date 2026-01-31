@@ -73,6 +73,7 @@ export default class UpdatePanel extends Mixins(BaseMixin) {
     mdiUpdate = mdiUpdate
 
     updatesChecked = false
+    checkRequested = false
 
     get enableUpdateManager() {
         return this.$store.state.server.components.includes('update_manager')
@@ -97,8 +98,22 @@ export default class UpdatePanel extends Mixins(BaseMixin) {
         return initModules.length > 0
     }
 
+    get isLoading() {
+        return this.loadings.includes('loadingBtnSyncUpdateManager')
+    }
+
+    // Следим за состоянием загрузки
+    updated() {
+        if (this.checkRequested && !this.isLoading) {
+            // Загрузка завершилась - устанавливаем флаг
+            this.updatesChecked = true
+            this.checkRequested = false
+        }
+    }
+
     btnSync() {
-        this.updatesChecked = true
+        this.checkRequested = true
+        this.updatesChecked = false
         this.$socket.emit(
             'machine.update.status',
             { refresh: true },
