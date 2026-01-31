@@ -1,41 +1,53 @@
 <template>
-    <panel
-        :title="$t('Machine.UpdatePanel.UpdateManager')"
-        :icon="mdiUpdate"
-        :loading="loading"
-        :collapsible="true"
-        card-class="update-manager-panel">
-        <v-card-text v-if="!enableUpdateManager">
-            <v-row>
-                <v-col>
-                    <p class="text-center mb-0">{{ $t('Machine.UpdatePanel.UpdateManagerDisabled') }}</p>
-                </v-col>
-            </v-row>
-        </v-card-text>
-        <v-card-text v-else>
-            <v-row>
-                <v-col class="text-right">
-                    <v-btn
-                        :loading="loadingBtnSyncUpdateManager"
-                        :title="$t('Machine.UpdatePanel.CheckForUpdates')"
-                        class="ml-2 minwidth-0 px-2"
-                        color="primary"
-                        @click="btnSync">
-                        <v-icon small>{{ mdiRefresh }}</v-icon>
-                        <span class="d-none d-sm-block ml-1">{{ $t('Machine.UpdatePanel.CheckForUpdates') }}</span>
-                    </v-btn>
-                </v-col>
-            </v-row>
-            <div class="update-manager-list">
-                <update-panel-entry-system v-if="existsSystemModul" />
-                <update-panel-entry
-                    v-for="module in modules"
-                    :key="module.key"
-                    :repo="module.data"
-                    :checked="checkedManually" />
-            </div>
-        </v-card-text>
-    </panel>
+    <div>
+        <panel
+            v-if="enableUpdateManager"
+            :title="$t('Machine.UpdatePanel.UpdateManager')"
+            :icon="mdiUpdate"
+            card-class="machine-update-panel"
+            :collapsible="true">
+            <template #buttons>
+                <v-tooltip top>
+                    <template #activator="{ on, attrs }">
+                        <v-btn
+                            icon
+                            tile
+                            color="primary"
+                            :ripple="true"
+                            :loading="loadings.includes('loadingBtnSyncUpdateManager')"
+                            :disabled="['printing', 'paused'].includes(printer_state)"
+                            v-bind="attrs"
+                            @click="btnSync"
+                            v-on="on">
+                            <v-icon>{{ mdiRefresh }}</v-icon>
+                        </v-btn>
+                    </template>
+                    <span>{{ $t('Machine.UpdatePanel.CheckForUpdates') }}</span>
+                </v-tooltip>
+            </template>
+            <v-card-text class="px-0 py-0 update-manager-list">
+                <template v-if="checkInitState">
+                    <template v-for="(module, index) in modules">
+                        <v-divider v-if="index" :key="'divider_' + module.name" class="my-0" />
+                        <update-panel-entry :key="module.name" :repo="module.data" />
+                    </template>
+                    <template v-if="existsSystemModul">
+                        <v-divider v-if="modules.length" class="my-0" />
+                        <update-panel-entry-system />
+                    </template>
+                </template>
+                <template v-else>
+                    <v-row class="mt-0 mb-0">
+                        <v-col class="px-6">
+                            <v-alert class="mb-0" text dense type="info" border="left">
+                                {{ $t('Machine.UpdatePanel.InitUpdateManager') }}
+                            </v-alert>
+                        </v-col>
+                    </v-row>
+                </template>
+            </v-card-text>
+        </panel>
+    </div>
 </template>
 
 <script lang="ts">
@@ -57,8 +69,6 @@ export default class UpdatePanel extends Mixins(BaseMixin) {
     mdiCloseThick = mdiCloseThick
     mdiUpdate = mdiUpdate
 
-    checkedManually = false
-
     get enableUpdateManager() {
         return this.$store.state.server.components.includes('update_manager')
     }
@@ -75,8 +85,15 @@ export default class UpdatePanel extends Mixins(BaseMixin) {
         return this.$store.state.server.updateManager?.system?.package_count ?? 0
     }
 
+    get checkInitState() {
+        const initModules = this.modules.filter(
+            (module: ServerUpdateManagerStateGuiList) => module.data.remote_version !== '?'
+        )
+
+        return initModules.length > 0
+    }
+
     btnSync() {
-        this.checkedManually = true
         this.$socket.emit(
             'machine.update.status',
             { refresh: true },
