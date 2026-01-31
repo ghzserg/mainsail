@@ -35,10 +35,6 @@
                         <v-divider v-if="modules.length" class="my-0" />
                         <update-panel-entry-system />
                     </template>
-                    <template v-if="showUpdateAll">
-                        <v-divider class="mb-0 mt-2 border-top-2" />
-                        <update-panel-entry-all />
-                    </template>
                 </template>
                 <template v-else>
                     <v-row class="mt-0 mb-0">
@@ -60,13 +56,12 @@ import BaseMixin from '../../mixins/base'
 import Panel from '@/components/ui/Panel.vue'
 import UpdatePanelEntry from '@/components/panels/Machine/UpdatePanel/Entry.vue'
 import UpdatePanelEntrySystem from '@/components/panels/Machine/UpdatePanel/EntrySystem.vue'
-import UpdatePanelEntryAll from '@/components/panels/Machine/UpdatePanel/EntryAll.vue'
 import { mdiRefresh, mdiInformation, mdiCloseThick, mdiUpdate } from '@mdi/js'
 import { ServerUpdateManagerStateGuiList } from '@/store/server/updateManager/types'
 import semver from 'semver'
 
 @Component({
-    components: { Panel, UpdatePanelEntry, UpdatePanelEntrySystem, UpdatePanelEntryAll },
+    components: { Panel, UpdatePanelEntry, UpdatePanelEntrySystem },
 })
 export default class UpdatePanel extends Mixins(BaseMixin) {
     mdiRefresh = mdiRefresh
@@ -96,34 +91,6 @@ export default class UpdatePanel extends Mixins(BaseMixin) {
         )
 
         return initModules.length > 0
-    }
-
-    get showUpdateAll() {
-        let count = 0
-
-        this.modules.forEach((module: ServerUpdateManagerStateGuiList) => {
-            // check git repos for updates
-            if (module.type === 'git' && module.data?.commits_behind?.length) {
-                count++
-                return
-            }
-
-            // check client web for updates
-            if (
-                module.type === 'web' &&
-                semver.valid(module.data?.remote_version, { loose: true }) &&
-                semver.valid(module.data?.version, { loose: true }) &&
-                semver.gt(module.data?.remote_version, module.data?.version, { loose: true })
-            ) {
-                count++
-                return
-            }
-        })
-
-        // check system packages for upgrades
-        if (this.systemPackagesCount > 0) count++
-
-        return count > 1
     }
 
     btnSync() {
