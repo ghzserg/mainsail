@@ -84,7 +84,7 @@ export default class SpoolmanPanelActiveSpool extends Mixins(BaseMixin) {
 
     get weightOutput() {
         let remaining = this.active_spool?.remaining_weight ?? null
-        let total = this.active_spool?.filament.weight ?? null
+        const total = this.active_spool?.filament.weight ?? null
 
         if (remaining === null || total === null) return null
         remaining = Math.round(remaining)
