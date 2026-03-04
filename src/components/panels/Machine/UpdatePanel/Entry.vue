@@ -211,7 +211,7 @@ export default class UpdatePanelEntry extends Mixins(BaseMixin) {
     }
 
     get versionOutput() {
-        let output = this.branchOutput ? `${this.branchOutput}: ` : ''
+        const output = this.branchOutput ? `${this.branchOutput}: ` : ''
 
         if (this.semverUpdatable) {
             return `${output}${this.localVersion} > ${this.remoteVersion}`
