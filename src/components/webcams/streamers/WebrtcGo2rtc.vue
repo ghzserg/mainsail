@@ -29,13 +29,13 @@ export default class WebrtcGo2rtc extends Mixins(BaseMixin, WebcamMixin) {
     pc: RTCPeerConnection | null = null
     ws: WebSocket | null = null
     restartPause = 2000
-    restartTimeout: any = null
+    restartTimeout: ReturnType<typeof setTimeout> | null = null
     status: string = 'connecting'
     aspectRatio: number | null = null
 
     @Prop({ required: true }) readonly camSettings!: GuiWebcamStateWebcam
     @Prop({ default: null }) readonly printerUrl!: string | null
-    @Ref() declare video: HTMLVideoElement
+    @Ref() readonly video!: HTMLVideoElement
 
     mounted() {
         this.start()
@@ -72,7 +72,7 @@ export default class WebrtcGo2rtc extends Mixins(BaseMixin, WebcamMixin) {
         try {
             urlSearch = new URL(this.camSettings.stream_url).search.toString()
             url = new URL('api/ws' + urlSearch, this.camSettings.stream_url)
-        } catch (e) {
+        } catch {
             this.log('invalid url', this.camSettings.stream_url)
         }
 
@@ -125,7 +125,7 @@ export default class WebrtcGo2rtc extends Mixins(BaseMixin, WebcamMixin) {
         this.start()
     }
 
-    log(msg: string, obj?: any) {
+    log(msg: string, obj?: unknown) {
         if (obj) {
             window.console.log(`[WebRTC go2rtc] ${msg}`, obj)
             return

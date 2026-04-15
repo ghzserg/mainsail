@@ -126,8 +126,7 @@ export default class BaseMixin extends Vue {
     get isIOS() {
         return !!(
             navigator.userAgent.match(/(iPad|iPhone|iPod)/) ||
-            // @ts-ignore
-            (navigator.platform === 'MacIntel' && typeof navigator.standalone !== 'undefined')
+            (navigator.platform === 'MacIntel' && 'standalone' in navigator)
         )
     }
 
@@ -152,7 +151,7 @@ export default class BaseMixin extends Vue {
             }
 
             return url.toString()
-        } catch (e) {
+        } catch {
             window.console.warn('[Spoolman]: SpoolManager URL is invalid:', baseurl)
 
             return undefined
@@ -202,9 +201,8 @@ export default class BaseMixin extends Vue {
         let tmp: Date | null = null
 
         try {
-            // @ts-ignore
-            tmp = (typeof value.getMonth === 'function' ? value : new Date(value)) as Date
-        } catch (_) {
+            tmp = value instanceof Date ? value : new Date(value)
+        } catch {
             return 'UNKNOWN'
         }
 
@@ -257,9 +255,8 @@ export default class BaseMixin extends Vue {
         let tmp
 
         try {
-            // @ts-ignore
-            tmp = (typeof value.getMonth === 'function' ? value : new Date(value)) as Date
-        } catch (_) {
+            tmp = value instanceof Date ? value : new Date(value)
+        } catch {
             return 'UNKNOWN'
         }
 
