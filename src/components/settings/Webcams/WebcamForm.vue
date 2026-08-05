@@ -1,5 +1,5 @@
 <template>
-    <v-form ref="webcamForm" v-model="valid" @submit.prevent="submit">
+    <v-form ref="webcamForm" v-model="valid" v-observe-visibility="visibilityChanged" @submit.prevent="submit">
         <v-card-title>{{ title }}</v-card-title>
         <v-card-text>
             <v-row>
@@ -205,7 +205,7 @@
                     </template>
                 </v-col>
                 <v-col class="col-12 col-sm-6 text-center" align-self="center">
-                    <webcam-wrapper :webcam="webcam" page="settings" />
+                    <webcam-wrapper v-if="showPreviewWebcam" :webcam="previewWebcam" page="settings" />
                 </v-col>
             </v-row>
         </v-card-text>
@@ -217,7 +217,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Prop } from 'vue-property-decorator'
+import { Component, Mixins, Prop, Watch } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
 import SettingsRow from '@/components/settings/SettingsRow.vue'
 import { mdiDelete, mdiPencil, mdiMenuDown } from '@mdi/js'
@@ -240,6 +240,10 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
     selectIcon = false
     valid = false
     oldWebcamName = ''
+
+    showPreviewWebcam = false
+    previewWebcam: GuiWebcamStateWebcam = {} as GuiWebcamStateWebcam
+    previewDebounce: ReturnType<typeof setTimeout> | null = null
 
     rules = {
         required: (value: string) => value !== '' || this.$t('Settings.WebcamsTab.Required'),
@@ -285,7 +289,7 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
     }
 
     get rulesStreamUrl() {
-        let rules = []
+        const rules = []
 
         if (this.webcam.service !== 'mjpegstreamer-adaptive') {
             rules.push(this.rules.required)
@@ -295,7 +299,7 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
     }
 
     get rulesSnapshotUrl() {
-        let rules = []
+        const rules = []
 
         if (this.webcam.service === 'mjpegstreamer-adaptive') {
             rules.push(this.rules.required)
@@ -334,7 +338,7 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
     }
 
     get classIconButtonArrow() {
-        let classes = ['_transition']
+        const classes = ['_transition']
 
         if (this.selectIcon) classes.push('_rotate-180')
 
@@ -386,8 +390,7 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
             return
         }
 
-        // @ts-ignore
-        this.webcam.extra_data.hideFps = newVal
+        this.webcam.extra_data!.hideFps = newVal
     }
 
     get enableAudio() {
@@ -403,8 +406,7 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
             return
         }
 
-        // @ts-ignore
-        this.webcam.extra_data.enableAudio = newVal
+        this.webcam.extra_data!.enableAudio = newVal
     }
 
     get nozzleCrosshairAvialable() {
@@ -455,6 +457,24 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
 
     mounted() {
         this.oldWebcamName = this.webcam.name
+        this.previewWebcam = this.cloneWebcam(this.webcam)
+    }
+
+    beforeDestroy() {
+        if (this.previewDebounce) clearTimeout(this.previewDebounce)
+    }
+
+    cloneWebcam(webcam: GuiWebcamStateWebcam): GuiWebcamStateWebcam {
+        return JSON.parse(JSON.stringify(webcam))
+    }
+
+    @Watch('webcam', { deep: true })
+    onWebcamChanged() {
+        if (this.previewDebounce) clearTimeout(this.previewDebounce)
+
+        this.previewDebounce = setTimeout(() => {
+            this.previewWebcam = this.cloneWebcam(this.webcam)
+        }, 500)
     }
 
     existsWebcamName(name: string) {
@@ -468,6 +488,10 @@ export default class WebcamForm extends Mixins(BaseMixin, WebcamMixin) {
 
         // If we are editing a webcam, we want to check if the name only exists once (the one we are editing)
         return count >= 1
+    }
+
+    visibilityChanged(newVal: boolean) {
+        this.showPreviewWebcam = newVal
     }
 
     submit() {
