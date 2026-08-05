@@ -144,7 +144,7 @@ export const getters: GetterTree<PrinterState, RootState> = {
 
     getMacros: (state) => {
         const array: PrinterStateMacro[] = []
-        const settings = state.configfile?.settings ?? null
+        const settings = state.configfile?.settings ?? {}
         const printerGcodes = state.gcode?.commands ?? {}
 
         const prefix = 'gcode_macro '
@@ -412,7 +412,7 @@ export const getters: GetterTree<PrinterState, RootState> = {
     },
 
     getPrinterConfigObjects: (state) => (objectNames: string[]) => {
-        const settings = state.configfile.settings
+        const settings = state.configfile?.settings
         if (!settings) return {}
 
         const output: Record<string, unknown> = {}
