@@ -1,6 +1,6 @@
 {
     "name": "mainsail",
-    "version": "2.18.2",
+    "version": "2.19.0",
     "private": true,
     "type": "module",
     "decription": "a klipper web interface",
@@ -10,6 +10,7 @@
     "scripts": {
         "serve": "vite serve",
         "build": "vite build && npm run build.zip",
+        "build:grammars": "node scripts/build-grammars.mjs",
         "format": "npm run format:base -- --write",
         "format:base": "prettier .",
         "format:check": "npm run format:base -- --check",
@@ -36,7 +37,7 @@
         "@codemirror/view": "^6.0.3",
         "@jaames/iro": "^5.5.2",
         "@lezer/highlight": "^1.0.0",
-        "@sindarius/gcodeviewer": "^3.7.17",
+        "@sindarius/gcodeviewer": "^3.7.18",
         "@uiw/codemirror-theme-vscode": "^4.23.13",
         "axios": "^1.16.0",
         "codemirror": "^6.0.1",
@@ -72,7 +73,9 @@
     },
     "devDependencies": {
         "@eslint/js": "^10.0.1",
+        "@lezer/generator": "^1.8.0",
         "@mdi/js": "^7.0.0",
+        "@pedrolamas/plugin-vue2": "^2.4.1",
         "@types/file-saver": "^2.0.5",
         "@types/jmuxer": "^2.0.3",
         "@types/lodash.kebabcase": "^4.1.6",
@@ -80,7 +83,6 @@
         "@types/node": "^20.19.0",
         "@types/overlayscrollbars": "^1.12.1",
         "@types/semver": "^7.3.8",
-        "@pedrolamas/plugin-vue2": "^2.4.1",
         "@vue/eslint-config-typescript": "^14.0.0",
         "autoprefixer": "^10.4.2",
         "cypress": "^15.15.0",
