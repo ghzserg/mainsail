@@ -14,7 +14,8 @@ export const actions: ActionTree<SocketState, RootState> = {
         commit('setData', payload)
     },
 
-    async setSocket({ commit, state }, payload) {
+    async setSocket({ commit, dispatch, state }, payload) {
+        dispatch('files/cancelDirectoryRequests', null, { root: true })
         commit('setData', payload)
 
         if ('$socket' in Vue.prototype) {
@@ -30,6 +31,7 @@ export const actions: ActionTree<SocketState, RootState> = {
     },
 
     onOpen({ commit, dispatch, rootState }) {
+        commit('reset')
         //set socket connection to connected
         commit('setConnected')
 
@@ -40,7 +42,8 @@ export const actions: ActionTree<SocketState, RootState> = {
             commit('server/updateManager/setStatus', { busy: false }, { root: true })
     },
 
-    onClose({ commit }) {
+    onClose({ commit, dispatch }) {
+        dispatch('files/cancelDirectoryRequests', null, { root: true })
         commit('setDisconnected')
     },
 

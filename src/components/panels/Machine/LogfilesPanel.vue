@@ -33,7 +33,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins } from 'vue-property-decorator'
+import { Component, Mixins, Watch } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
 import Panel from '@/components/ui/Panel.vue'
 import { mdiFileDocumentEdit, mdiFileSyncOutline } from '@mdi/js'
@@ -48,6 +48,11 @@ export default class LogfilesPanel extends Mixins(BaseMixin) {
     mdiFileSyncOutline = mdiFileSyncOutline
 
     showRolloverDialog = false
+
+    @Watch('guiIsReady', { immediate: true })
+    loadLogs() {
+        this.$store.dispatch('files/requestDirectory', 'logs')
+    }
 
     get filesInLogRoot(): FileStateFile[] {
         return this.$store.getters['files/getDirectory']('logs')?.childrens ?? []

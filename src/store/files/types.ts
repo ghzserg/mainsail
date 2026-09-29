@@ -19,6 +19,7 @@ export interface FileStateFile {
     modified: Date
     permissions: string
     childrens?: FileStateFile[]
+    loaded?: boolean
     disk_usage?: FileStateDiskUsage
     print_start_time?: Date | null
     uuid?: string | null

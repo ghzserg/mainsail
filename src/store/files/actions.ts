@@ -9,28 +9,86 @@ import {
 } from '@/store/files/types'
 import { RootState } from '@/store/types'
 import i18n from '@/plugins/i18n'
-import { hiddenDirectories, validGcodeExtensions } from '@/store/variables'
+import { hiddenDirectories, themeDir, validGcodeExtensions } from '@/store/variables'
 import axios, { AxiosProgressEvent, AxiosResponse } from 'axios'
 import { BatchMessage } from '@/plugins/webSocketClient'
+import { DeferredDirectoryQueue } from '@/plugins/deferredDirectoryQueue'
+
+// Scoped to the store module; no traversal or response can carry over to another printer/socket.
+const directoryQueues = new WeakMap<
+    FileState,
+    { queue: DeferredDirectoryQueue<ApiGetDirectoryReturn>; unwatch: () => void }
+>()
 
 export const actions: ActionTree<FileState, RootState> = {
-    reset({ commit }) {
+    reset({ commit, dispatch }) {
+        dispatch('cancelDirectoryRequests')
         commit('reset')
     },
 
-    initRootDirs({ state, commit }, dirs) {
-        dirs.forEach((dirname: string) => {
+    cancelDirectoryRequests({ state }) {
+        const loader = directoryQueues.get(state)
+        loader?.queue.cancel()
+        loader?.unwatch()
+        directoryQueues.delete(state)
+    },
+
+    requestDirectory({ state, dispatch, rootState }, path: string) {
+        if (!rootState.socket?.isConnected) return
+        let loader = directoryQueues.get(state)
+        if (!loader) {
+            const socket = Vue.$socket.instance
+            const queue = new DeferredDirectoryQueue<ApiGetDirectoryReturn>(
+                (requestPath) => {
+                    if (Vue.$socket.instance !== socket) {
+                        queue.cancel()
+                        return Promise.reject(new Error('Directory request belongs to a disconnected printer'))
+                    }
+                    return Vue.$socket.emitAndWait('server.files.get_directory', { path: requestPath })
+                },
+                (requestPath, result) => {
+                    if (Vue.$socket.instance !== socket) return
+                    dispatch('getDirectory', { ...result, requestParams: { path: requestPath } })
+                },
+                (requestPath, error) => window.console.error(`Unable to load directory ${requestPath}`, error)
+            )
+            const unwatch = this.watch(
+                (rootState) =>
+                    rootState.socket?.isConnected === true && rootState.socket.initializationList.length === 0,
+                (ready) => queue.setEnabled(ready),
+                { immediate: true }
+            )
+            loader = { queue, unwatch }
+            directoryQueues.set(state, loader)
+        }
+        loader.queue.enqueue(path)
+    },
+
+    requestDirectoryPath({ getters, dispatch }, requestedPath: string) {
+        const parts = requestedPath.replace(/^\/+|\/+$/g, '').split('/')
+        parts.forEach((_, index) => {
+            const path = parts.slice(0, index + 1).join('/')
+            if (index === parts.length - 1 || !getters.getDirectory(path)?.loaded) {
+                dispatch('requestDirectory', path)
+            }
+        })
+    },
+
+    initRootDirs({ state, commit, dispatch }, dirs: string[]) {
+        // Populate the dashboard's file list before less frequently used roots.
+        const orderedDirs = [...dirs].sort((a, b) => Number(b === 'gcodes') - Number(a === 'gcodes'))
+        orderedDirs.forEach((dirname: string) => {
             if (state.filetree.findIndex((tmp: FileStateFile) => tmp.filename === dirname) === -1) {
                 commit('createRootDir', {
                     name: dirname,
                     permissions: 'r',
                 })
-                Vue.$socket.emit('server.files.get_directory', { path: dirname }, { action: 'files/getDirectory' })
             }
+            if (!['logs', 'docs', 'config_examples'].includes(dirname)) dispatch('requestDirectory', dirname)
         })
     },
 
-    getDirectory({ state, commit, getters }, payload: ApiGetDirectoryReturn) {
+    getDirectory({ state, commit, getters, dispatch }, payload: ApiGetDirectoryReturn) {
         const requestPath = (payload.requestParams?.path ?? '') as string
         const pathArray = requestPath.split('/')
         const root = pathArray.length ? pathArray[0] : requestPath
@@ -86,11 +144,12 @@ export const actions: ActionTree<FileState, RootState> = {
                             },
                         })
 
-                        Vue.$socket.emit(
-                            'server.files.get_directory',
-                            { path: requestPath + '/' + dir.dirname },
-                            { action: 'files/getDirectory' }
-                        )
+                        // Config, documentation and logs are browsed on demand. Preserve the complete
+                        // gcode tree for the dashboard's all-files view and eagerly load theme assets.
+                        const lazyRoot = ['config', 'docs', 'config_examples', 'logs'].includes(root)
+                        if (!lazyRoot || (requestPath === 'config' && dir.dirname === themeDir)) {
+                            dispatch('requestDirectory', requestPath + '/' + dir.dirname)
+                        }
                     }
                 })
         }
@@ -137,6 +196,7 @@ export const actions: ActionTree<FileState, RootState> = {
         if (payload.requestParams?.path && payload.disk_usage) {
             commit('setDiskUsage', { disk_usage: payload.disk_usage, path: payload.requestParams.path })
         }
+        commit('setDirectoryLoaded', requestPath)
     },
 
     scanMetadata({ commit }, payload: { filename: string }) {

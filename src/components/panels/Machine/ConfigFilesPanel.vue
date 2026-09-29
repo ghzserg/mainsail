@@ -463,10 +463,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Mixins, Ref } from 'vue-property-decorator'
+import { Component, Mixins, Ref, Watch } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
 import ThemeMixin from '@/components/mixins/theme'
 import { escapePath, formatFilesize, generateTimestamp, sortFiles } from '@/plugins/helpers'
+import { collectArchiveItems } from '@/plugins/collectArchiveItems'
 import { FileStateFile, FileStateGcodefile } from '@/store/files/types'
 import axios from 'axios'
 import type { CancelTokenSource } from 'axios'
@@ -912,11 +913,13 @@ export default class ConfigFilesPanel extends Mixins(BaseMixin, ThemeMixin) {
     }
 
     refreshFileList() {
-        this.$socket.emit(
-            'server.files.get_directory',
-            { path: this.absolutePath.substring(1) },
-            { action: 'files/getDirectory' }
-        )
+        this.$store.dispatch('files/requestDirectoryPath', this.absolutePath)
+    }
+
+    @Watch('absolutePath', { immediate: true })
+    @Watch('guiIsReady')
+    loadCurrentDirectory() {
+        this.refreshFileList()
     }
 
     changeRoot() {
@@ -997,29 +1000,21 @@ export default class ConfigFilesPanel extends Mixins(BaseMixin, ThemeMixin) {
     }
 
     async downloadSelectedFiles() {
-        if (this.selectedFiles.length === 1) {
+        if (this.selectedFiles.length === 1 && !this.selectedFiles[0].isDirectory) {
             this.startDownloadFile(this.selectedFiles[0].filename)
             this.selectedFiles = []
             return
         }
 
-        const items: string[] = []
-
-        const addElementToItems = async (absolutPath: string, directory: FileStateFile[]) => {
-            for (const file of directory) {
-                const filePath = `${absolutPath}/${file.filename}`
-
-                if (file.isDirectory && file.childrens) {
-                    await addElementToItems(filePath, file.childrens)
-
-                    continue
-                }
-
-                items.push(filePath)
-            }
+        let items: string[]
+        try {
+            items = await collectArchiveItems(this.absolutePath, this.selectedFiles, (path) =>
+                this.$socket.emitAndWait('server.files.get_directory', { path })
+            )
+        } catch (error) {
+            this.$toast.error(error instanceof Error ? error.message : String(error))
+            return
         }
-
-        await addElementToItems(this.absolutePath, this.selectedFiles)
 
         this.$socket.emit(
             'server.files.zip',

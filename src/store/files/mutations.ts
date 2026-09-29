@@ -6,6 +6,20 @@ import { FileState, FileStateFile } from '@/store/files/types'
 import { allowedMetadata } from '@/store/variables'
 
 export const mutations: MutationTree<FileState> = {
+    setDirectoryLoaded(state, path: string) {
+        let children = state.filetree
+        const parts = path.split('/')
+        for (const [index, part] of parts.entries()) {
+            const directory = children.find((entry) => entry.isDirectory && entry.filename === part)
+            if (!directory) return
+            if (index === parts.length - 1) {
+                Vue.set(directory, 'loaded', true)
+                return
+            }
+            children = directory.childrens ?? []
+        }
+    },
+
     reset(state) {
         Object.assign(state, getDefaultState())
     },
