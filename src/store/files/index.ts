@@ -8,6 +8,7 @@ import { RootState } from '@/store/types'
 export const getDefaultState = (): FileState => {
     return {
         filetree: [],
+        directoryProgress: { pending: 0, completed: 0, failed: 0 },
         upload: {
             show: false,
             filename: '',

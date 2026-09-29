@@ -49,6 +49,7 @@ describe('file initialization with real Vuex modules', () => {
         await Vue.nextTick()
         await vi.runAllTimersAsync()
         expect(emitAndWait.mock.calls.map((call) => call[1].path)).toEqual(['gcodes', 'config'])
+        expect(store.state.files.directoryProgress).toEqual({ pending: 0, completed: 2, failed: 0 })
         await store.dispatch('files/requestDirectoryPath', '/docs')
         await vi.runAllTimersAsync()
         expect(emitAndWait.mock.calls.at(-1)?.[1]).toEqual({ path: 'docs' })
@@ -106,6 +107,7 @@ describe('file initialization with real Vuex modules', () => {
         await Vue.nextTick()
         await vi.advanceTimersByTimeAsync(0)
         await store.dispatch('files/reset')
+        expect(store.state.files.directoryProgress).toEqual({ pending: 0, completed: 0, failed: 0 })
         Vue.$socket.instance = { readyState: 1 } as WebSocket
         resolve({
             ...result,

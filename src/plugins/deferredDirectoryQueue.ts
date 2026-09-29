@@ -1,3 +1,9 @@
+export interface DirectoryQueueProgress {
+    pending: number
+    completed: number
+    failed: number
+}
+
 /** Keeps background traversal out of initialization and limits it to one RPC at a time. */
 export class DeferredDirectoryQueue<T> {
     private paths = new Set<string>()
@@ -5,17 +11,25 @@ export class DeferredDirectoryQueue<T> {
     private running = false
     private cancelled = false
     private enabled = false
+    private completed = 0
+    private failed = 0
     private timer: ReturnType<typeof setTimeout> | null = null
 
     constructor(
         private request: (path: string) => Promise<T>,
         private apply: (path: string, result: T) => void,
-        private onError: (path: string, error: unknown) => void
+        private onError: (path: string, error: unknown) => void,
+        private onProgress: (progress: DirectoryQueueProgress) => void = () => {}
     ) {}
 
     enqueue(path: string): void {
-        if (this.cancelled || path === this.activePath) return
+        if (this.cancelled || path === this.activePath || this.paths.has(path)) return
+        if (!this.running && !this.paths.size) {
+            this.completed = 0
+            this.failed = 0
+        }
         this.paths.add(path)
+        this.publishProgress()
         this.schedule()
     }
 
@@ -29,6 +43,15 @@ export class DeferredDirectoryQueue<T> {
         this.paths.clear()
         if (this.timer !== null) clearTimeout(this.timer)
         this.timer = null
+        this.onProgress({ pending: 0, completed: 0, failed: 0 })
+    }
+
+    private publishProgress(): void {
+        this.onProgress({
+            pending: this.paths.size + Number(this.running),
+            completed: this.completed,
+            failed: this.failed,
+        })
     }
 
     private schedule(): void {
@@ -51,10 +74,17 @@ export class DeferredDirectoryQueue<T> {
             const result = await this.request(path)
             if (!this.cancelled) this.apply(path, result)
         } catch (error) {
-            if (!this.cancelled) this.onError(path, error)
+            if (!this.cancelled) {
+                this.failed++
+                this.onError(path, error)
+            }
         } finally {
             this.activePath = null
             this.running = false
+            if (!this.cancelled) {
+                this.completed++
+                this.publishProgress()
+            }
             this.schedule()
         }
     }

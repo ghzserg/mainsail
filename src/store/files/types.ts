@@ -1,7 +1,9 @@
 import { CancelTokenSource } from 'axios'
+import type { DirectoryQueueProgress } from '@/plugins/deferredDirectoryQueue'
 
 export interface FileState {
     filetree: FileStateFile[]
+    directoryProgress: DirectoryQueueProgress
     upload: {
         show: boolean
         filename: string

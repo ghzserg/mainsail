@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { DeferredDirectoryQueue } from '@/plugins/deferredDirectoryQueue'
+import { DeferredDirectoryQueue, type DirectoryQueueProgress } from '@/plugins/deferredDirectoryQueue'
 
 const deferred = <T>() => {
     let resolve!: (value: T) => void
@@ -14,6 +14,64 @@ const deferred = <T>() => {
 describe('deferred directory queue', () => {
     beforeEach(() => vi.useFakeTimers())
     afterEach(() => vi.useRealTimers())
+
+    it('reports child discovery and only completes when all requests finish', async () => {
+        const progress: DirectoryQueueProgress[] = []
+        const queue = new DeferredDirectoryQueue(
+            vi.fn().mockResolvedValue({}),
+            (path) => {
+                if (path === 'config') queue.enqueue('config/.theme')
+            },
+            vi.fn(),
+            (value) => progress.push(value)
+        )
+        queue.enqueue('config')
+        queue.enqueue('config')
+        queue.enqueue('gcodes')
+        expect(progress).toEqual([
+            { pending: 1, completed: 0, failed: 0 },
+            { pending: 2, completed: 0, failed: 0 },
+        ])
+        queue.setEnabled(true)
+        await vi.runAllTimersAsync()
+        expect(progress).toContainEqual({ pending: 3, completed: 0, failed: 0 })
+        expect(progress).toContainEqual({ pending: 2, completed: 1, failed: 0 })
+        expect(progress.at(-1)).toEqual({ pending: 0, completed: 3, failed: 0 })
+        expect(progress.filter((value) => value.pending === 0)).toHaveLength(1)
+    })
+
+    it('reports failures and resets counts for a later batch', async () => {
+        const progress = vi.fn()
+        const queue = new DeferredDirectoryQueue(
+            vi.fn().mockRejectedValueOnce(new Error('missing')).mockResolvedValue({}),
+            vi.fn(),
+            vi.fn(),
+            progress
+        )
+        queue.setEnabled(true)
+        queue.enqueue('missing')
+        await vi.runAllTimersAsync()
+        expect(progress).toHaveBeenLastCalledWith({ pending: 0, completed: 1, failed: 1 })
+        queue.enqueue('gcodes')
+        expect(progress).toHaveBeenLastCalledWith({ pending: 1, completed: 0, failed: 0 })
+        await vi.runAllTimersAsync()
+        expect(progress).toHaveBeenLastCalledWith({ pending: 0, completed: 1, failed: 0 })
+    })
+
+    it('clears progress on cancellation without reporting stale success', async () => {
+        const request = deferred<object>()
+        const progress = vi.fn()
+        const queue = new DeferredDirectoryQueue(() => request.promise, vi.fn(), vi.fn(), progress)
+        queue.setEnabled(true)
+        queue.enqueue('gcodes')
+        await vi.advanceTimersByTimeAsync(0)
+        queue.cancel()
+        const count = progress.mock.calls.length
+        request.resolve({})
+        await vi.runAllTimersAsync()
+        expect(progress).toHaveBeenCalledTimes(count)
+        expect(progress).toHaveBeenLastCalledWith({ pending: 0, completed: 0, failed: 0 })
+    })
 
     it('does not send any filesystem work until the core UI is ready', async () => {
         const request = vi.fn().mockResolvedValue({})

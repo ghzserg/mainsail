@@ -4,8 +4,13 @@ import { findDirectory } from '@/plugins/helpers'
 import { MutationTree } from 'vuex'
 import { FileState, FileStateFile } from '@/store/files/types'
 import { allowedMetadata } from '@/store/variables'
+import type { DirectoryQueueProgress } from '@/plugins/deferredDirectoryQueue'
 
 export const mutations: MutationTree<FileState> = {
+    setDirectoryProgress(state, progress: DirectoryQueueProgress) {
+        Vue.set(state, 'directoryProgress', progress)
+    },
+
     setDirectoryLoaded(state, path: string) {
         let children = state.filetree
         const parts = path.split('/')

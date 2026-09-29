@@ -18,6 +18,7 @@
             <the-bed-screws-dialog />
             <the-screws-tilt-adjust-dialog />
             <the-macro-prompt />
+            <the-directory-load-indicator />
         </template>
         <the-select-printer-dialog v-else-if="instancesDB !== 'moonraker'" />
         <the-connecting-dialog v-else />
@@ -44,10 +45,12 @@ import TheBedScrewsDialog from '@/components/dialogs/TheBedScrewsDialog.vue'
 import TheScrewsTiltAdjustDialog from '@/components/dialogs/TheScrewsTiltAdjustDialog.vue'
 import { setAndLoadLocale } from './plugins/i18n'
 import TheMacroPrompt from '@/components/dialogs/TheMacroPrompt.vue'
+import TheDirectoryLoadIndicator from '@/components/TheDirectoryLoadIndicator.vue'
 import { AppRoute } from '@/routes'
 
 @Component({
     components: {
+        TheDirectoryLoadIndicator,
         TheMacroPrompt,
         TheTimelapseRenderingSnackbar,
         TheEditor,

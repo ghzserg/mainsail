@@ -26,14 +26,15 @@ export const actions: ActionTree<FileState, RootState> = {
         commit('reset')
     },
 
-    cancelDirectoryRequests({ state }) {
+    cancelDirectoryRequests({ state, commit }) {
         const loader = directoryQueues.get(state)
         loader?.queue.cancel()
         loader?.unwatch()
         directoryQueues.delete(state)
+        commit('setDirectoryProgress', { pending: 0, completed: 0, failed: 0 })
     },
 
-    requestDirectory({ state, dispatch, rootState }, path: string) {
+    requestDirectory({ state, commit, dispatch, rootState }, path: string) {
         if (!rootState.socket?.isConnected) return
         let loader = directoryQueues.get(state)
         if (!loader) {
@@ -50,7 +51,10 @@ export const actions: ActionTree<FileState, RootState> = {
                     if (Vue.$socket.instance !== socket) return
                     dispatch('getDirectory', { ...result, requestParams: { path: requestPath } })
                 },
-                (requestPath, error) => window.console.error(`Unable to load directory ${requestPath}`, error)
+                (requestPath, error) => window.console.error(`Unable to load directory ${requestPath}`, error),
+                (progress) => {
+                    if (Vue.$socket.instance === socket) commit('setDirectoryProgress', progress)
+                }
             )
             const unwatch = this.watch(
                 (rootState) =>
