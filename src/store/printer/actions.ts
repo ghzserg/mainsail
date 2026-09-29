@@ -22,7 +22,11 @@ export const actions: ActionTree<PrinterState, RootState> = {
         Vue.$socket.emit('printer.info', {}, { action: 'printer/getInfo' })
         Vue.$socket.emit('server.gcode_store', {}, { action: 'server/getGcodeStore' })
 
-        dispatch('initSubscripts')
+        dispatch('initSubscripts').catch((error: unknown) => {
+            if (Vue.$socket.instance?.readyState === WebSocket.OPEN) {
+                window.console.error('Unable to initialize printer subscriptions', error)
+            }
+        })
     },
 
     getInfo({ commit, dispatch }, payload) {
@@ -46,7 +50,9 @@ export const actions: ActionTree<PrinterState, RootState> = {
     },
 
     async initSubscripts({ dispatch }) {
+        const socket = Vue.$socket.instance
         const payload = await Vue.$socket.emitAndWait('printer.objects.list')
+        if (Vue.$socket.instance !== socket) return
 
         let subscripts = {}
         const blocklist = ['menu']
@@ -59,6 +65,7 @@ export const actions: ActionTree<PrinterState, RootState> = {
 
         if (Object.keys(subscripts).length > 0) {
             const result = await Vue.$socket.emitAndWait('printer.objects.subscribe', { objects: subscripts }, {})
+            if (Vue.$socket.instance !== socket) return
 
             // reset screws_tilt_adjust if it exists
             if ('screws_tilt_adjust' in result.status) {
@@ -70,7 +77,12 @@ export const actions: ActionTree<PrinterState, RootState> = {
             dispatch('getData', result)
 
             setTimeout(() => {
-                dispatch('initExtruderCanExtrude')
+                if (Vue.$socket.instance !== socket) return
+                dispatch('initExtruderCanExtrude').catch((error: unknown) => {
+                    if (Vue.$socket.instance?.readyState === WebSocket.OPEN) {
+                        window.console.error('Unable to query extruder state', error)
+                    }
+                })
             }, 200)
         }
 
@@ -132,12 +144,23 @@ export const actions: ActionTree<PrinterState, RootState> = {
     },
 
     async initGcodes({ commit }) {
-        const gcodes = await Vue.$socket.emitAndWait('printer.objects.query', { objects: { gcode: ['commands'] } }, {})
-
-        commit('setData', gcodes.status)
+        const socket = Vue.$socket.instance
+        try {
+            const gcodes = await Vue.$socket.emitAndWait(
+                'printer.objects.query',
+                { objects: { gcode: ['commands'] } },
+                {}
+            )
+            if (Vue.$socket.instance === socket) commit('setData', gcodes.status)
+        } catch (error) {
+            if (socket?.readyState === WebSocket.OPEN && Vue.$socket.instance === socket) {
+                window.console.error('Unable to query G-code commands', error)
+            }
+        }
     },
 
     async initExtruderCanExtrude({ dispatch, state }) {
+        const socket = Vue.$socket.instance
         const extruderList: string[] = Object.keys(state).filter((name) => name.startsWith('extruder'))
         const reInitList: { [key: string]: string[] } = {}
 
@@ -146,6 +169,7 @@ export const actions: ActionTree<PrinterState, RootState> = {
         })
 
         const result = await Vue.$socket.emitAndWait('printer.objects.query', { objects: reInitList }, {})
+        if (Vue.$socket.instance !== socket) return
         dispatch('getData', result.status)
     },
 

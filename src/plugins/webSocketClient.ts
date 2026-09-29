@@ -96,32 +96,41 @@ export class WebSocketClient {
             isConnecting: true,
         })
 
+        this.clearWaits()
+        if (this.heartbeatTimer) clearTimeout(this.heartbeatTimer)
+        this.heartbeatTimer = null
         this.instance?.close()
         this.instance = new WebSocket(this.url)
+        const instance = this.instance
 
         this.instance.onopen = () => {
+            if (this.instance !== instance) return
             this.reconnects = 0
             this.store?.dispatch('socket/onOpen', event)
         }
 
         this.instance.onclose = (e) => {
+            if (this.instance !== instance) return
+            if (this.heartbeatTimer) clearTimeout(this.heartbeatTimer)
+            this.heartbeatTimer = null
+            this.clearWaits()
+            this.store?.dispatch('socket/onClose', e)
             if (e.wasClean || this.reconnects >= this.maxReconnects) {
-                this.store?.dispatch('socket/onClose', e)
                 return
             }
 
             this.reconnects++
             setTimeout(() => {
-                this.connect()
+                if (this.instance === instance) this.connect()
             }, this.reconnectInterval)
         }
 
         this.instance.onerror = () => {
-            this.instance?.close()
+            instance.close()
         }
 
         this.instance.onmessage = (msg) => {
-            if (this.store === null) return
+            if (this.store === null || this.instance !== instance) return
 
             // websocket is alive
             this.heartbeat()
@@ -143,13 +152,20 @@ export class WebSocketClient {
         this.instance?.close()
     }
 
+    private clearWaits(): void {
+        for (const wait of [...this.waits]) {
+            wait.reject?.(new Error('WebSocket disconnected'))
+            this.removeWaitById(wait.id)
+        }
+    }
+
     getWaitById(id: number): Wait | null {
         return this.waits.find((wait: Wait) => wait.id === id) ?? null
     }
 
     removeWaitById(id: number | null): void {
         const index = this.waits.findIndex((wait: Wait) => wait.id === id)
-        if (index) {
+        if (index >= 0) {
             const wait = this.waits[index]
             if (wait.loading) this.store?.dispatch('socket/removeLoading', { name: wait.loading })
             this.waits.splice(index, 1)
@@ -186,7 +202,10 @@ export class WebSocketClient {
         options: emitOptions = {}
     ): Promise<RPCResult<M>> {
         return new Promise<RPCResult<M>>((resolve, reject) => {
-            if (this.instance?.readyState !== WebSocket.OPEN) reject()
+            if (this.instance?.readyState !== WebSocket.OPEN) {
+                reject(new Error('WebSocket is not connected'))
+                return
+            }
 
             const id = this.messageId++
             this.waits.push({
