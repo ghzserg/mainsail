@@ -2,6 +2,12 @@
 # Changelog
 All notable changes to Mainsail will be documented in this file.
 
+## [2.19.1](https://github.com/mainsail-crew/mainsail/releases/tag/v2.19.1) - 2026-08-27
+### Features
+
+- **logfiles**: Add mms.log file to the log files panel ([#2591](https://github.com/mainsail-crew/mainsail/pull/2591))
+- **logfiles**: Add AFC.log file to the log files panel ([#2590](https://github.com/mainsail-crew/mainsail/pull/2590))
+
 ## [2.19.0](https://github.com/mainsail-crew/mainsail/releases/tag/v2.19.0) - 2026-08-27
 ### Features
 

@@ -25,7 +25,16 @@ export const actions: ActionTree<FileState, RootState> = {
                     name: dirname,
                     permissions: 'r',
                 })
-                Vue.$socket.emit('server.files.get_directory', { path: dirname }, { action: 'files/getDirectory' })
+
+                if (dirname === 'gcodes') {
+                    Promise.resolve().then(() => {
+                        Vue.$socket.emit('server.files.get_directory', { path: dirname }, { action: 'files/getDirectory' })
+                    })
+                } else {
+                    setTimeout(() => {
+                        Vue.$socket.emit('server.files.get_directory', { path: dirname }, { action: 'files/getDirectory' })
+                    }, 4000)
+                }
             }
         })
     },
@@ -86,11 +95,13 @@ export const actions: ActionTree<FileState, RootState> = {
                             },
                         })
 
-                        Vue.$socket.emit(
-                            'server.files.get_directory',
-                            { path: requestPath + '/' + dir.dirname },
-                            { action: 'files/getDirectory' }
-                        )
+                        setTimeout(() => {
+                            Vue.$socket.emit(
+                                'server.files.get_directory',
+                                { path: requestPath + '/' + dir.dirname },
+                                { action: 'files/getDirectory' }
+                            )
+                        }, 500)
                     }
                 })
         }
