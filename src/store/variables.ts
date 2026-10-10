@@ -36,7 +36,7 @@ export const additionalSensors = [
 /*
  * List of valid gcode file extensions
  */
-export const validGcodeExtensions = ['.gcode', '.g', '.gco', '.ufp', '.nc']
+export const validGcodeExtensions = ['.gcode', '.g', '.gco', '.ufp', '.nc', '.3mf']
 
 /*
  * List of initable server components
