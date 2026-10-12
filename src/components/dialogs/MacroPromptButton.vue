@@ -1,11 +1,17 @@
 <template>
-    <v-btn :color="color" :style="computedStyle" class="ma-2" @click="sendCommand">{{ text }}</v-btn>
+    <v-btn :color="vuetifyColor" :style="computedStyle" class="ma-2" @click="sendCommand">{{ text }}</v-btn>
 </template>
 
 <script lang="ts">
 import { Component, Mixins, Prop } from 'vue-property-decorator'
 import BaseMixin from '@/components/mixins/base'
 import { ServerStateEventPrompt } from '@/store/server/types'
+
+interface RGB {
+    r: number;
+    g: number;
+    b: number;
+}
 
 @Component({})
 export default class MacroPromptButton extends Mixins(BaseMixin) {
@@ -23,12 +29,23 @@ export default class MacroPromptButton extends Mixins(BaseMixin) {
         return this.splits[1] ?? this.text
     }
 
-    get color() {
-        return this.splits[2] ?? ''
+    get rawColor() {
+        return this.splits[2]?.trim() ?? ''
     }
+
+    get isHex() {
+        const hexRegex = /^#?([a-f\d]{3}){1,2}$/i;
+        return hexRegex.test(this.rawColor);
+    }
+
+    get vuetifyColor() {
+        return this.isHex ? '' : this.rawColor;
+    }
+
     // https://github.com/function3d/mainsail/
     get bgcolor() {
-        return this.splits[3] ? '#'+this.splits[3] : ''
+        if (!this.rawColor || !this.isHex) return '';
+        return this.rawColor.startsWith('#') ? this.rawColor : '#' + this.rawColor;
     }
 
     get computedStyle() {
@@ -45,6 +62,7 @@ export default class MacroPromptButton extends Mixins(BaseMixin) {
     get textcolor() {
         if (this.bgcolor) {
             var hex = this.hexToRgb(this.bgcolor)
+            if (!hex) return ''
             var gray = hex.r*0.299 + hex.g*0.587 + hex.b*0.114
             if (gray > 186)
                 return 'black'
@@ -55,7 +73,7 @@ export default class MacroPromptButton extends Mixins(BaseMixin) {
         }
     }
 
-    hexToRgb(hex) {
+    hexToRgb(hex: string): RGB | null {
       // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
       var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
       hex = hex.replace(shorthandRegex, function(m, r, g, b) {
