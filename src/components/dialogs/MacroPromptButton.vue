@@ -13,6 +13,8 @@ interface RGB {
     b: number;
 }
 
+const HEX_REGEX = /^([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$|^([a-f\d])([a-f\d])([a-f\d])$/i;
+
 @Component({})
 export default class MacroPromptButton extends Mixins(BaseMixin) {
     @Prop({ type: Object, required: true }) readonly event!: ServerStateEventPrompt
@@ -34,18 +36,16 @@ export default class MacroPromptButton extends Mixins(BaseMixin) {
     }
 
     get isHex() {
-        const hexRegex = /^#?([a-f\d]{3}){1,2}$/i;
-        return hexRegex.test(this.rawColor);
+        return HEX_REGEX.test(this.rawColor);
     }
 
     get vuetifyColor() {
         return this.isHex ? '' : this.rawColor;
     }
 
-    // https://github.com/function3d/mainsail/
     get bgcolor() {
         if (!this.rawColor || !this.isHex) return '';
-        return this.rawColor.startsWith('#') ? this.rawColor : '#' + this.rawColor;
+        return '#' + this.rawColor;
     }
 
     get computedStyle() {
@@ -61,33 +61,29 @@ export default class MacroPromptButton extends Mixins(BaseMixin) {
 
     get textcolor() {
         if (this.bgcolor) {
-            var hex = this.hexToRgb(this.bgcolor)
+            const hex = this.hexToRgb(this.bgcolor)
             if (!hex) return ''
-            var gray = hex.r*0.299 + hex.g*0.587 + hex.b*0.114
-            if (gray > 186)
-                return 'black'
-            else
-                return 'white'
-        } else {
-            return ''
+            const gray = hex.r * 0.299 + hex.g * 0.587 + hex.b * 0.114
+            return gray > 186 ? 'black' : 'white'
         }
+        return ''
     }
 
     hexToRgb(hex: string): RGB | null {
-      // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
-      var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
-      hex = hex.replace(shorthandRegex, function(m, r, g, b) {
-        return r + r + g + g + b + b;
-      });
+        const match = HEX_REGEX.exec(hex);
+        if (!match) return null;
 
-      var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-      return result ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16)
-      } : null;
+        const r = match[1] ?? (match[4] + match[4]);
+        const g = match[2] ?? (match[5] + match[5]);
+        const b = match[3] ?? (match[6] + match[6]);
+
+        return {
+            r: parseInt(r, 16),
+            g: parseInt(g, 16),
+            b: parseInt(b, 16)
+        };
     }
-    // end https://github.com/function3d/mainsail/
+
     sendCommand() {
         this.$store.dispatch('server/addEvent', { message: this.command, type: 'command' })
         this.$socket.emit('printer.gcode.script', { script: this.command })
