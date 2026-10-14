@@ -9,7 +9,7 @@ import {
 } from '@/store/files/types'
 import { RootState } from '@/store/types'
 import i18n from '@/plugins/i18n'
-import { hiddenDirectories, validGcodeExtensions } from '@/store/variables'
+import { hiddenDirectories, themeDir, validGcodeExtensions } from '@/store/variables'
 import axios, { AxiosProgressEvent, AxiosResponse } from 'axios'
 import { BatchMessage } from '@/plugins/webSocketClient'
 
@@ -18,7 +18,7 @@ export const actions: ActionTree<FileState, RootState> = {
         commit('reset')
     },
 
-    initRootDirs({ state, commit }, dirs) {
+    initRootDirs({ state, commit, dispatch }, dirs) {
         dirs.forEach((dirname: string) => {
             if (state.filetree.findIndex((tmp: FileStateFile) => tmp.filename === dirname) === -1) {
                 commit('createRootDir', {
@@ -37,6 +37,30 @@ export const actions: ActionTree<FileState, RootState> = {
                 }
             }
         })
+
+        // Request the theme folder right away instead of waiting for the staggered scan of config. On slow
+        // printers that scan can stall Moonraker long enough to drop the websocket, and the theme folder would
+        // stay empty until it is refreshed by hand. Also runs on reconnect, when the scan above is skipped.
+        if (dirs.includes('config')) dispatch('initThemeDir')
+    },
+
+    initThemeDir() {
+        Vue.$socket.emit(
+            'server.files.get_directory',
+            { path: 'config/' + themeDir },
+            { action: 'files/getThemeDirectory' }
+        )
+    },
+
+    getThemeDirectory({ commit, dispatch, getters }, payload: ApiGetDirectoryReturn) {
+        // the config listing may not be here yet, so add the folder before filling it
+        if (!getters['getDirectory']('config/' + themeDir)) {
+            commit('setCreateDir', {
+                item: { path: themeDir, root: 'config', permissions: payload.root_info?.permissions ?? 'r' },
+            })
+        }
+
+        dispatch('getDirectory', payload)
     },
 
     getDirectory({ state, commit, getters }, payload: ApiGetDirectoryReturn) {
