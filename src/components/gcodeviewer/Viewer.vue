@@ -201,7 +201,7 @@
                 </v-row>
                 <input
                     ref="fileInput"
-                    :accept="'.g,.gcode,.gc,.gco,.nc,.ngc,.tap,.3mf'"
+                    :accept="'.g,.gcode,.gc,.gco,.nc,.ngc,.tap'"
                     hidden
                     multiple
                     type="file"

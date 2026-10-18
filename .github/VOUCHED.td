@@ -15,6 +15,7 @@
 bigtreetech
 ghzserg
 hannott
+jacrob32
 jimmyjon711 Maintainer from AFC
 jomik
 julianschill LED effects Maintainer
@@ -33,4 +34,3 @@ samuel-0-0 Long-time Chinese (zh) localization contributor
 sindarius
 weblate
 xtrack33
-coder-racer
