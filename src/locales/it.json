@@ -193,7 +193,9 @@
     "Dialogs": {
         "StartPrint": {
             "Afc": {
-                "AutoMap": "Assegnazione automatica"
+                "AutoMap": "Assegnazione automatica",
+                "AutoPa": "Auto PA",
+                "Leveling": "Mesh piatto"
             },
             "DoYouWantToStartFilename": "Vuoi cominciare {filename}?",
             "DoYouWantToStartFilenameFilament": "Vuoi cominciare {filename} con il seguente filamento?",

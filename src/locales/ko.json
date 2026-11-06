@@ -143,7 +143,9 @@
     "Dialogs": {
         "StartPrint": {
             "Afc": {
-                "AutoMap": "자동 매핑"
+                "AutoMap": "자동 매핑",
+                "AutoPa": "Auto PA",
+                "Leveling": "베드 메시"
             },
             "DoYouWantToStartFilename": "{filename} 파일을 출력 하시겠습니까?",
             "Headline": "출력 시작 확인",

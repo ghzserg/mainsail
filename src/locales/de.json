@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Automatische Zuordnung",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "Die Filament Typ im G-Code {{file}} stimmt nicht überein zum ausgewählten Filament Typ {{lane}}.",
-                "FilamentWeightNotEnough": "Nicht genug Filament in der ausgewählte Linie ({lane}). Benötigt: {required}, Verfügbar: {available}."
+                "FilamentWeightNotEnough": "Nicht genug Filament in der ausgewählte Linie ({lane}). Benötigt: {required}, Verfügbar: {available}.",
+                "Leveling": "Bett-Mesh"
             },
             "DoYouWantToStartFilename": "Willst du {filename} starten?",
             "DoYouWantToStartFilenameFilament": "Willst du {filename} mit dem folgenden Filament starten?",

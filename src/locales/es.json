@@ -193,7 +193,9 @@
     "Dialogs": {
         "StartPrint": {
             "Afc": {
-                "AutoMap": "Asignación automática"
+                "AutoMap": "Asignación automática",
+                "AutoPa": "Auto PA",
+                "Leveling": "Malla de cama"
             },
             "DoYouWantToStartFilename": "¿Desea iniciar {filename}?",
             "DoYouWantToStartFilenameFilament": "¿Quieres iniciar {filename} con el siguiente filamento?",

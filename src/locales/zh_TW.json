@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "自動匹配",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "G-Code 中的耗材類型 ({file}) 與所選通道的耗材類型 ({lane}) 不符。",
-                "FilamentWeightNotEnough": "所選通道 ({lane}) 的耗材不足。需要：{required}，目前可用：{available}。"
+                "FilamentWeightNotEnough": "所選通道 ({lane}) 的耗材不足。需要：{required}，目前可用：{available}。",
+                "Leveling": "熱床網格"
             },
             "DoYouWantToStartFilename": "您確定要開始列印 {filename} 嗎？",
             "DoYouWantToStartFilenameFilament": "您想要使用以下耗材開始列印 {filename} 嗎？",

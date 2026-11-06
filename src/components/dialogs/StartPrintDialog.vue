@@ -16,6 +16,7 @@
             <start-print-dialog-afc v-if="afcExists" :file="file" />
             <start-print-dialog-mmu v-else-if="existsMmu" :file="file" />
             <start-print-dialog-spoolman v-else-if="existsSpoolman" :file="file" />
+            <start-print-dialog-zmod v-if="afcExists" />
             <start-print-dialog-timelapse v-if="existsTimelapse" />
             <v-divider v-if="showDivider" class="my-0" />
             <v-card-actions>

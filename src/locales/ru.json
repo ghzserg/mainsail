@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Автоподбор",
+                "AutoPa": "Авто PA",
                 "FilamentTypeMismatch": "Выбраный в G-Коде ({file}) филамент на соответствует выбраному ({lane}).",
-                "FilamentWeightNotEnough": "Не достаточно филамента ({lane}). Требуется: {required}, Доступно: {available}."
+                "FilamentWeightNotEnough": "Не достаточно филамента ({lane}). Требуется: {required}, Доступно: {available}.",
+                "Leveling": "Карта стола"
             },
             "DoYouWantToStartFilename": "Запустить печать файла {filename}?",
             "DoYouWantToStartFilenameFilament": "Запустить печать файла {filename} следующим прутком?",

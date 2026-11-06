@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Auto-map",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "Filament type in the G-Code ({file}) does not match the selected filament type ({lane}).",
-                "FilamentWeightNotEnough": "Not enough filament in the selected lane ({lane}). Required: {required}, Available: {available}."
+                "FilamentWeightNotEnough": "Not enough filament in the selected lane ({lane}). Required: {required}, Available: {available}.",
+                "Leveling": "Bed mesh"
             },
             "DoYouWantToStartFilename": "Do you want to start {filename}?",
             "DoYouWantToStartFilenameFilament": "Do you want to start {filename} with the following filament?",

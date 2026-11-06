@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Otomatik eşleme",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "G-kodundaki ({file}) filament tipi, seçilen filament tipiyle ({lane}) eşleşmiyor.",
-                "FilamentWeightNotEnough": "Seçilen şeritte ({lane}) yeterli filament yok. Gerekli: {required}, Mevcut: {available}."
+                "FilamentWeightNotEnough": "Seçilen şeritte ({lane}) yeterli filament yok. Gerekli: {required}, Mevcut: {available}.",
+                "Leveling": "Tabla ağı"
             },
             "DoYouWantToStartFilename": "{filename} başlatmak istiyor musunuz?",
             "DoYouWantToStartFilenameFilament": "{filename} dosyasını aşağıdaki filament ile başlatmak ister misiniz?",

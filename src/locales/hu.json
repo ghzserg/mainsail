@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Automatikus hozzárendelés",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "A ({file}) G-Code állományban szereplő filament típus nem egyezik a kiválasztott ({lane}) filament típussal .",
-                "FilamentWeightNotEnough": "Nincs elegendő filament a kiválasztott csatornában ({lane}). Szükséges: {required}, rendelkezésre áll: {available}."
+                "FilamentWeightNotEnough": "Nincs elegendő filament a kiválasztott csatornában ({lane}). Szükséges: {required}, rendelkezésre áll: {available}.",
+                "Leveling": "Ágyháló"
             },
             "DoYouWantToStartFilename": "Elkezded a {filename} nyomtatását?",
             "DoYouWantToStartFilenameFilament": "Szeretnéd a {filename} fájlt a következő nyomtatószállal indítani?",

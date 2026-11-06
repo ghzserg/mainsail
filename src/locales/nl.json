@@ -183,7 +183,9 @@
     "Dialogs": {
         "StartPrint": {
             "Afc": {
-                "AutoMap": "Automatisch toewijzen"
+                "AutoMap": "Automatisch toewijzen",
+                "AutoPa": "Auto PA",
+                "Leveling": "Bed mesh"
             },
             "DoYouWantToStartFilename": "Wil je {filename} starten?",
             "Headline": "Start print",

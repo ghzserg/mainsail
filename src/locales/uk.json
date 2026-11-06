@@ -182,7 +182,9 @@
     "Dialogs": {
         "StartPrint": {
             "Afc": {
-                "AutoMap": "Автопідбір"
+                "AutoMap": "Автопідбір",
+                "AutoPa": "Авто PA",
+                "Leveling": "Карта столу"
             },
             "DoYouWantToStartFilename": "Ви хочете роздрукувати {filename}?",
             "DoYouWantToStartFilenameFilament": "Хочете почати друк {filename} з наявного філаменту?",

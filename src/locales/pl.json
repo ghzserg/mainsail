@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Automatyczne przypisanie",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "Typ filamentu w G-Code ({file}) nie pasuje do wybranego typu filamentu ({lane}).",
-                "FilamentWeightNotEnough": "Za mało filamentu w wybranym torze ({lane}). Wymagane: {required}, Dostępne: {available}."
+                "FilamentWeightNotEnough": "Za mało filamentu w wybranym torze ({lane}). Wymagane: {required}, Dostępne: {available}.",
+                "Leveling": "Siatka stołu"
             },
             "DoYouWantToStartFilename": "Czy chcesz rozpocząć druk {filename}?",
             "DoYouWantToStartFilenameFilament": "Rozpocząć {filename} z następującym filamentem?",

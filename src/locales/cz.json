@@ -194,7 +194,9 @@
     "Dialogs": {
         "StartPrint": {
             "Afc": {
-                "AutoMap": "Automatické přiřazení"
+                "AutoMap": "Automatické přiřazení",
+                "AutoPa": "Auto PA",
+                "Leveling": "Mapa podložky"
             },
             "DoYouWantToStartFilename": "Chcete začít tisk {filename}?",
             "DoYouWantToStartFilenameFilament": "Chcete spustit {filename} s následujícím filamentem?",

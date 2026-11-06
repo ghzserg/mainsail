@@ -195,8 +195,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Samodejna dodelitev",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "Tip filamenta v G-kodi ({file}) se ne ujema z izbranim tipom ({lane}).",
-                "FilamentWeightNotEnough": "V izbrani liniji ({lane}) ni dovolj filamenta. Potrebno: {required}, na voljo: {available}."
+                "FilamentWeightNotEnough": "V izbrani liniji ({lane}) ni dovolj filamenta. Potrebno: {required}, na voljo: {available}.",
+                "Leveling": "Mreža mize"
             },
             "DoYouWantToStartFilename": "Želite začeti s tiskanjem {filename}?",
             "DoYouWantToStartFilenameFilament": "Želite zagnati {filename} z naslednjim filamentom?",

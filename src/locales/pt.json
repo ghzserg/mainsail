@@ -190,8 +190,10 @@
         "StartPrint": {
             "Afc": {
                 "AutoMap": "Atribuição automática",
+                "AutoPa": "Auto PA",
                 "FilamentTypeMismatch": "O tipo de filamento no arquivo G-Code {file} não corresponde ao tipo selecionado em {lane}.",
-                "FilamentWeightNotEnough": "Não há filamento suficiente na linha selecionada ({lane}). Requer: {required}, Disponível: {available}."
+                "FilamentWeightNotEnough": "Não há filamento suficiente na linha selecionada ({lane}). Requer: {required}, Disponível: {available}.",
+                "Leveling": "Malha da mesa"
             },
             "DoYouWantToStartFilename": "Deseja iniciar {filename}?",
             "DoYouWantToStartFilenameFilament": "Você deseja iniciar {filename} com este filamento?",

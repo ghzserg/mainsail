@@ -182,7 +182,9 @@
     "Dialogs": {
         "StartPrint": {
             "Afc": {
-                "AutoMap": "Automatisk tildeling"
+                "AutoMap": "Automatisk tildeling",
+                "AutoPa": "Auto PA",
+                "Leveling": "Bed mesh"
             },
             "DoYouWantToStartFilename": "Vil du begynde at printe: {filename}?",
             "DoYouWantToStartFilenameFilament": "Vil du begynde at printe {filename} med dette filament?",
