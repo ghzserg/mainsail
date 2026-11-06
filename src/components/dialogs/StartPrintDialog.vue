@@ -107,8 +107,32 @@ export default class StartPrintDialog extends Mixins(BaseMixin, AfcMixin) {
             filename = filename.substring(1)
         }
 
+        const tools = this.zmodTools()
         this.closeDialog()
-        this.$socket.emit('printer.print.start', { filename }, { action: 'switchToDashboard' })
+        this.$socket.emit(
+            'printer.print.start',
+            { filename, ...(tools ? { tools } : {}) },
+            { action: 'switchToDashboard' }
+        )
+    }
+
+    // Z-Mod: slot per used tool from lane.map ("2,,1"), passed to printer.print.start as tools
+    zmodTools(): string | undefined {
+        if (!this.afcExists || this.$store.state.printer.zmod_color == null) return undefined
+
+        const used = (this.file.filament_weights ?? []).flatMap((weight, tool) => (weight > 0 ? [tool] : []))
+        if (!used.length) return undefined
+
+        const slots: string[] = Array(Math.max(...used) + 1).fill('')
+        for (const tool of used) {
+            const lane = this.afcLanes.find((lane) => {
+                const map = this.getAfcLaneObject(lane).map
+                const tools: string[] = Array.isArray(map) ? map : [map]
+                return tools.some((t) => t?.toLowerCase() === `t${tool}`)
+            })
+            slots[tool] = lane?.replace(/\D/g, '') ?? ''
+        }
+        return slots.join(',')
     }
 
     closeDialog() {
