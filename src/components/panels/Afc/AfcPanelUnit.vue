@@ -1,6 +1,6 @@
 <template>
     <div>
-        <v-row>
+        <v-row v-if="!afcZmod || afcUnits.length > 1">
             <v-col class="pb-0 d-flex flex-row justify-space-between align-center">
                 <h3 class="text-h6">
                     <v-icon v-if="modulIcon" left>{{ modulIcon }}</v-icon>

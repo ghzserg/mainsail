@@ -23,11 +23,12 @@
                 <afc-unit-lane-filament-dialog v-model="showFilamentDialog" :name="name" />
             </v-col>
             <v-col class="pr-6 pl-2 pt-0 pb-0 d-flex flex-column justify-space-between align-end">
-                <v-btn v-if="afcShowLaneInfinite" x-small @click="showInfintiyDialog = true">
+                <v-btn v-if="afcShowLaneInfinite && !afcZmod" x-small @click="showInfintiyDialog = true">
                     <v-icon v-if="runoutLane === 'NONE'" color="error" small>{{ afcIconInfintiy }}</v-icon>
                     <template v-else>{{ runoutLane }}</template>
                 </v-btn>
                 <afc-unit-lane-infinite-dialog v-model="showInfintiyDialog" :name="name" />
+                <span v-if="afcZmod" class="font-weight-bold">{{ name.toUpperCase() }}</span>
                 <span class="font-weight-bold">{{ spoolMaterialOutput }}</span>
                 <span class="text--disabled">{{ spoolRemainingWeightOutput }}</span>
                 <v-tooltip v-if="hasTd" top>

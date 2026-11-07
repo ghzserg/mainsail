@@ -1,6 +1,6 @@
 <template>
     <div class="grey flex-grow-1 afc-unit-lane d-flex flex-column" :class="laneStatusClass">
-        <afc-panel-unit-lane-header :name="name" />
+        <afc-panel-unit-lane-header v-if="!afcZmod" :name="name" />
         <template v-if="laneReady">
             <afc-panel-unit-lane-body :name="name" />
             <afc-panel-unit-lane-actions :name="name" />
