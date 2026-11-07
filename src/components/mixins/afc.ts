@@ -32,6 +32,10 @@ export default class AfcMixin extends Vue {
         return this.$store.state.printer.zmod_color != null
     }
 
+    afcLaneLabel(name?: string): string {
+        return this.afcZmod && name ? name.replace(/^lane/i, 'S') : (name ?? '')
+    }
+
     get afcExtruders(): string[] {
         return this.afc.extruders ?? []
     }

@@ -28,7 +28,7 @@
                     <template v-else>{{ runoutLane }}</template>
                 </v-btn>
                 <afc-unit-lane-infinite-dialog v-model="showInfintiyDialog" :name="name" />
-                <span v-if="afcZmod" class="font-weight-bold">{{ name.toUpperCase() }}</span>
+                <span v-if="afcZmod" class="font-weight-bold">{{ afcLaneLabel(name).toUpperCase() }}</span>
                 <span class="font-weight-bold">{{ spoolMaterialOutput }}</span>
                 <span class="text--disabled">{{ spoolRemainingWeightOutput }}</span>
                 <v-tooltip v-if="hasTd" top>

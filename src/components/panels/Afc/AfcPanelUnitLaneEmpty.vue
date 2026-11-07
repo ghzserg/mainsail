@@ -4,7 +4,7 @@
             <v-col
                 class="align-content-center text-center text--disabled px-6"
                 :class="{ 'pb-6': !prep, 'pt-3': !prep }">
-                <div v-if="afcZmod" class="font-weight-bold">{{ name.toUpperCase() }}</div>
+                <div v-if="afcZmod" class="font-weight-bold">{{ afcLaneLabel(name).toUpperCase() }}</div>
                 {{ text }}
             </v-col>
         </v-row>
@@ -12,7 +12,14 @@
             <v-col class="px-6 pb-6">
                 <v-tooltip top>
                     <template #activator="{ on, attrs }">
-                        <v-btn dense small class="w-100 elevation-0" v-bind="attrs" v-on="on" @click="ejectLane">
+                        <v-btn
+                            :disabled="printerIsPrintingOnly"
+                            dense
+                            small
+                            class="w-100 elevation-0"
+                            v-bind="attrs"
+                            v-on="on"
+                            @click="ejectLane">
                             <v-icon small>{{ mdiEject }}</v-icon>
                         </v-btn>
                     </template>

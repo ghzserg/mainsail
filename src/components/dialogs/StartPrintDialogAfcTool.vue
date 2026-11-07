@@ -14,7 +14,7 @@
             <gcodefiles-panel-table-row-file-metadata-filaments-badge :filament="fileFilament" />
         </v-col>
         <v-col class="d-flex align-center pr-0">
-            <span class="mr-3 text-subtitle-1 font-weight-bold text-uppercase">{{ laneName }}</span>
+            <span class="mr-3 text-subtitle-1 font-weight-bold text-uppercase">{{ afcLaneLabel(laneName) }}</span>
             <gcodefiles-panel-table-row-file-metadata-filaments-badge :filament="laneFilament" />
             <v-menu offset-y left>
                 <template #activator="{ on, attrs }">
@@ -28,7 +28,9 @@
                         :key="lane"
                         :disabled="lane === laneName"
                         @click="changeToolMapping(lane)">
-                        <span class="mr-3 text-subtitle-1 font-weight-bold text-uppercase">{{ lane }}</span>
+                        <span class="mr-3 text-subtitle-1 font-weight-bold text-uppercase">
+                            {{ afcLaneLabel(lane) }}
+                        </span>
                         <gcodefiles-panel-table-row-file-metadata-filaments-badge
                             :filament="getAfcLaneFilament(lane)" />
                     </v-list-item>
